@@ -1,0 +1,40 @@
+---
+layout: default
+title: Home
+---
+
+<div class="home">
+  <nav class="site-nav">
+    <a href="{{ '/' | relative_url }}">Home</a> |
+    <a href="{{ '/about' | relative_url }}">About</a> |
+    <a href="{{ '/categories' | relative_url }}">Categories</a>
+  </nav>
+  <h1 class="page-heading">Mirrored Posts from news.hada.io</h1>
+
+  <ul class="post-list">
+    {% for post in paginator.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: '%B %d, %Y' }}</span>
+        <h2>
+          <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <p>{{ post.excerpt | strip_html | truncate: 150 }}</p>
+        {% if post.original_url %}
+          <p><a href="{{ post.original_url }}" target="_blank">Read Original</a></p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <!-- Pagination links -->
+  <div class="pagination">
+    {% if paginator.previous_page %}
+      <a href="{{ paginator.previous_page_path | relative_url }}" class="previous">Previous</a>
+    {% endif %}
+    {% if paginator.next_page %}
+      <a href="{{ paginator.next_page_path | relative_url }}" class="next">Next</a>
+    {% endif %}
+  </div>
+
+  <p class="rss-subscribe">Subscribe <a href="{{ '/feed.xml' | relative_url }}">via RSS</a></p>
+</div>
