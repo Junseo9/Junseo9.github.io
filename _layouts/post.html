@@ -1,36 +1,50 @@
 ---
 layout: default
 ---
-<article class="post">
+<article class="blog-post">
   <header class="post-header">
     <h1 class="post-title">{{ page.title }}</h1>
-    <div class="post-meta">
-      <span class="post-date">{{ page.date | date: "%Y년 %m월 %d일" }}</span>
-      {% if page.categories %}
-      <span class="post-categories">
-        {% for category in page.categories %}
-          <span class="category">{{ category }}</span>
-        {% endfor %}
-      </span>
+    <div class="post-meta-info">
+      <time class="post-date" datetime="{{ page.date | date: '%Y-%m-%d' }}">
+        {{ page.date | date: "%Y년 %m월 %d일" }}
+      </time>
+      {% if page.author %}
+      <span class="post-author">작성자: {{ page.author }}</span>
+      {% endif %}
+      {% if page.external_url %}
+      <a href="{{ page.external_url }}" target="_blank" rel="noopener noreferrer" class="post-source">
+        원문 보기 →
+      </a>
       {% endif %}
     </div>
+    {% if page.categories or page.tags %}
+    <div class="post-taxonomy">
+      {% if page.categories %}
+      <div class="post-categories">
+        {% for category in page.categories %}
+          <span class="category-badge">{{ category }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if page.tags %}
+      <div class="post-tags">
+        {% for tag in page.tags %}
+          <span class="tag-badge">#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
   </header>
 
-  <div class="post-content">
+  <div class="post-body">
     {{ content }}
   </div>
 
   <footer class="post-footer">
-    {% if page.tags %}
-    <div class="post-tags">
-      {% for tag in page.tags %}
-        <span class="tag">#{{ tag }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
-    <div class="post-navigation">
-      <a href="{{ '/' | relative_url }}">← 목록으로</a>
-    </div>
+    <nav class="post-navigation">
+      <a href="{{ '/' | relative_url }}" class="nav-link">← 목록으로 돌아가기</a>
+    </nav>
   </footer>
 </article>
 

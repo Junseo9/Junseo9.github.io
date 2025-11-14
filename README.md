@@ -1,6 +1,6 @@
-# My Personal Blog
+# GeekNews Mirror
 
-A personal blog built with Jekyll and hosted on GitHub Pages.
+A blog that automatically mirrors content from [news.hada.io](https://news.hada.io/), built with Jekyll and hosted on GitHub Pages.
 
 ## 🚀 Quick Start - Create a New Post
 
@@ -110,8 +110,42 @@ bundle exec jekyll serve
 
 Then open http://localhost:4000 in your browser.
 
+## 🔄 Automatic Content Mirroring
+
+This blog automatically mirrors articles from [news.hada.io](https://news.hada.io/).
+
+### Manual Mirroring
+
+To manually run the mirror script:
+
+```bash
+pip install -r requirements.txt
+python3 mirror_hada.py
+```
+
+The script will:
+- Fetch new articles from news.hada.io
+- Create Jekyll posts for each article
+- Track already mirrored articles to avoid duplicates
+- Save metadata in `.hada_mirror_data.json`
+
+### Automatic Updates
+
+A GitHub Actions workflow runs every 6 hours to automatically fetch and mirror new content. The workflow:
+- Runs on a schedule (every 6 hours)
+- Can be manually triggered from the Actions tab
+- Automatically commits and pushes new posts
+
+### Mirror Script Features
+
+- **Duplicate Prevention**: Tracks mirrored article IDs to avoid duplicates
+- **Metadata Extraction**: Extracts title, points, author, time, and external URLs
+- **Content Fetching**: Fetches detailed content from article pages
+- **Jekyll Integration**: Creates properly formatted Jekyll posts with frontmatter
+
 ## 📚 Resources
 
 - [Jekyll Documentation](https://jekyllrb.com/docs/)
 - [Markdown Guide](https://www.markdownguide.org/)
 - [GitHub Pages Documentation](https://docs.github.com/en/pages)
+- [news.hada.io](https://news.hada.io/) - Original source

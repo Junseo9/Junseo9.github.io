@@ -1,39 +1,50 @@
 ---
 layout: default
 ---
-<div class="posts-container">
-  <ol class="posts-list">
+<div class="blog-container">
+  <div class="posts-grid">
     {% for post in paginator.posts %}
-    <li class="post-item">
-      <span class="post-rank">{% if paginator.page == 1 %}{{ forloop.index }}{% else %}{% assign rank = paginator.per_page | times: paginator.previous_page | plus: forloop.index %}{{ rank }}{% endif %}</span>
-      <div class="post-content">
-        <div class="post-header">
-          <a href="{{ post.url | relative_url }}" class="post-title">{{ post.title }}</a>
-          {% if post.external_url %}
-          <span class="post-domain">({{ post.external_url | replace: 'https://', '' | replace: 'http://', '' | split: '/' | first }})</span>
+    <article class="post-card">
+      <div class="post-card-header">
+        <h2 class="post-card-title">
+          <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        </h2>
+        <div class="post-card-meta">
+          <time class="post-card-date">{{ post.date | date: "%Y년 %m월 %d일" }}</time>
+          {% if post.author %}
+          <span class="post-card-author">{{ post.author }}</span>
           {% endif %}
         </div>
-        <div class="post-meta">
-          <span class="post-points">{{ post.points | default: 0 }} points</span>
-          <span class="post-author">by {{ post.author | default: site.author.name }}</span>
-          <span class="post-time">{{ post.date | date: "%Y-%m-%d %H:%M" }}</span>
-          <a href="{{ post.url | relative_url }}#comments" class="post-comments">댓글</a>
-        </div>
       </div>
-    </li>
+      {% if post.excerpt %}
+      <div class="post-card-excerpt">
+        {{ post.excerpt | strip_html | truncatewords: 30 }}
+      </div>
+      {% endif %}
+      <div class="post-card-footer">
+        <a href="{{ post.url | relative_url }}" class="read-more">읽기 →</a>
+        {% if post.categories %}
+        <div class="post-card-categories">
+          {% for category in post.categories limit: 2 %}
+            <span class="category-tag">{{ category }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </article>
     {% endfor %}
-  </ol>
+  </div>
 
   {% if paginator.total_pages > 1 %}
-  <div class="pagination">
+  <nav class="pagination-nav">
     {% if paginator.previous_page %}
-      <a href="{{ paginator.previous_page_path | relative_url }}" class="page-link">이전</a>
+      <a href="{{ paginator.previous_page_path | relative_url }}" class="pagination-link pagination-prev">← 이전</a>
     {% endif %}
-    <span class="page-number">페이지 {{ paginator.page }} / {{ paginator.total_pages }}</span>
+    <span class="pagination-info">페이지 {{ paginator.page }} / {{ paginator.total_pages }}</span>
     {% if paginator.next_page %}
-      <a href="{{ paginator.next_page_path | relative_url }}" class="page-link">다음</a>
+      <a href="{{ paginator.next_page_path | relative_url }}" class="pagination-link pagination-next">다음 →</a>
     {% endif %}
-  </div>
+  </nav>
   {% endif %}
 </div>
 
