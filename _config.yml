@@ -1,5 +1,5 @@
 title: My Personal Blog
-email: your-email@example.com
+email: rlatjdgus2008@gmail.com
 description: >-
   Welcome to my personal blog. I share my thoughts, experiences, 
   and knowledge about various topics.
@@ -7,8 +7,8 @@ baseurl: ""
 url: "https://Sungheyn.github.io"
 
 author:
-  name: Your Name
-  email: your-email@example.com
+  name: 전서구
+  email: rlatjdgus2008@gmail.com
 
 theme: minima
 
