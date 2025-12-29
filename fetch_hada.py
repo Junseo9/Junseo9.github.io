@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import os
 import re
 import sys
@@ -8,8 +7,7 @@ from urllib.request import urlopen, Request
 from xml.etree import ElementTree as ET
 
 RSS_URL = "https://news.hada.io/rss/news"
-OUTPUT_DIR = "_data"
-OUTPUT_FILE = os.path.join(OUTPUT_DIR, "hada.json")
+POSTS_DIR = "_posts"
 
 def fetch_rss() -> str:
     headers = {
@@ -28,78 +26,121 @@ def strip_html_tags(html: str) -> str:
     text = re.sub(r'<[^>]+>', ' ', html)
     return re.sub(r'\s+', ' ', text).strip()
 
+def html_to_markdown(html: str) -> str:
+    text = html
+    text = re.sub(r'<h[1-6][^>]*>(.*?)</h[1-6]>', r'## \1\n', text)
+    text = re.sub(r'<strong>(.*?)</strong>', r'**\1**', text)
+    text = re.sub(r'<b>(.*?)</b>', r'**\1**', text)
+    text = re.sub(r'<em>(.*?)</em>', r'*\1*', text)
+    text = re.sub(r'<i>(.*?)</i>', r'*\1*', text)
+    text = re.sub(r'<code>(.*?)</code>', r'`\1`', text)
+    text = re.sub(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', r'[\2](\1)', text)
+    text = re.sub(r'<li>(.*?)</li>', r'- \1\n', text)
+    text = re.sub(r'<ul[^>]*>|</ul>', '', text)
+    text = re.sub(r'<ol[^>]*>|</ol>', '', text)
+    text = re.sub(r'<p>(.*?)</p>', r'\1\n\n', text)
+    text = re.sub(r'<br\s*/?>', '\n', text)
+    text = re.sub(r'<[^>]+>', '', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
 def extract_topic_id(url: str) -> str | None:
     match = re.search(r'id=(\d+)', url)
     return match.group(1) if match else None
 
-def parse_atom_feed(xml_content: str) -> dict:
+def slugify(text: str) -> str:
+    text = re.sub(r'[^\w\s가-힣-]', '', text)
+    text = re.sub(r'\s+', '-', text)
+    return text[:50].strip('-')
+
+def parse_datetime(dt_str: str) -> datetime:
+    try:
+        return datetime.fromisoformat(dt_str.replace('+09:00', '+0900').replace(':', ''))
+    except:
+        try:
+            return datetime.strptime(dt_str[:19], '%Y-%m-%dT%H:%M:%S')
+        except:
+            return datetime.now()
+
+def create_post(entry: dict) -> tuple[str, str]:
+    published = parse_datetime(entry['published'])
+    date_str = published.strftime('%Y-%m-%d')
+    slug = slugify(entry['title'])
+    filename = f"{date_str}-{slug}.md"
+    
+    content_md = html_to_markdown(entry['content_html'])
+    
+    frontmatter = f"""---
+layout: post
+title: "{entry['title'].replace('"', '\\"')}"
+date: {published.strftime('%Y-%m-%d %H:%M:%S')} +0900
+categories: geeknews
+tags: [geeknews, hada]
+author: {entry['author']}
+original_url: {entry['topic_url']}
+---
+
+"""
+    
+    body = f"""> 이 글은 [GeekNews]({entry['topic_url']})에서 미러된 글입니다.
+> 원문 작성자: [{entry['author']}]({entry['author_url']})
+
+{content_md}
+
+---
+
+[GeekNews에서 원문 보기]({entry['topic_url']})
+"""
+    
+    return filename, frontmatter + body
+
+def parse_and_save(xml_content: str) -> int:
     ns = {'atom': 'http://www.w3.org/2005/Atom'}
     root = ET.fromstring(xml_content)
     
-    feed_title = root.find('atom:title', ns)
-    feed_subtitle = root.find('atom:subtitle', ns)
-    feed_updated = root.find('atom:updated', ns)
+    os.makedirs(POSTS_DIR, exist_ok=True)
     
-    feed_data = {
-        'title': feed_title.text if feed_title is not None else 'GeekNews',
-        'subtitle': feed_subtitle.text if feed_subtitle is not None else '',
-        'updated': feed_updated.text if feed_updated is not None else datetime.now().isoformat(),
-        'source_url': 'https://news.hada.io',
-        'fetched_at': datetime.now().isoformat(),
-        'entries': []
-    }
-    
+    count = 0
     for entry in root.findall('atom:entry', ns):
-        title = entry.find('atom:title', ns)
-        link = entry.find('atom:link', ns)
+        title_el = entry.find('atom:title', ns)
+        link_el = entry.find('atom:link', ns)
         entry_id = entry.find('atom:id', ns)
-        updated = entry.find('atom:updated', ns)
-        published = entry.find('atom:published', ns)
-        author = entry.find('atom:author/atom:name', ns)
-        author_uri = entry.find('atom:author/atom:uri', ns)
-        content = entry.find('atom:content', ns)
+        published_el = entry.find('atom:published', ns)
+        author_el = entry.find('atom:author/atom:name', ns)
+        author_uri_el = entry.find('atom:author/atom:uri', ns)
+        content_el = entry.find('atom:content', ns)
         
         topic_id = extract_topic_id(entry_id.text) if entry_id is not None and entry_id.text else None
-        link_href = link.get('href') if link is not None else ''
-        content_html = content.text if content is not None and content.text else ''
-        content_text = strip_html_tags(content_html)
         
         entry_data = {
-            'title': title.text if title is not None else '',
-            'link': link_href,
+            'title': title_el.text if title_el is not None else '',
             'topic_id': topic_id,
-            'topic_url': f"https://news.hada.io/topic?id={topic_id}" if topic_id else link_href,
-            'updated': updated.text if updated is not None else '',
-            'published': published.text if published is not None else '',
-            'author': author.text if author is not None else '',
-            'author_url': author_uri.text if author_uri is not None else '',
-            'content_html': content_html,
-            'content_text': content_text[:500] + '...' if len(content_text) > 500 else content_text,
+            'topic_url': f"https://news.hada.io/topic?id={topic_id}" if topic_id else '',
+            'published': published_el.text if published_el is not None else '',
+            'author': author_el.text if author_el is not None else 'unknown',
+            'author_url': author_uri_el.text if author_uri_el is not None else '',
+            'content_html': content_el.text if content_el is not None and content_el.text else '',
         }
         
-        feed_data['entries'].append(entry_data)
+        filename, content = create_post(entry_data)
+        filepath = os.path.join(POSTS_DIR, filename)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        print(f"Created: {filename}")
+        count += 1
     
-    return feed_data
-
-def save_json(data: dict) -> None:
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    
-    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    
-    print(f"Saved {len(data['entries'])} entries to {OUTPUT_FILE}")
+    return count
 
 def main():
     print(f"Fetching RSS from {RSS_URL}...")
     xml_content = fetch_rss()
     
-    print("Parsing Atom feed...")
-    feed_data = parse_atom_feed(xml_content)
+    print("Parsing and creating posts...")
+    count = parse_and_save(xml_content)
     
-    print(f"Found {len(feed_data['entries'])} entries")
-    save_json(feed_data)
-    
-    print("Done!")
+    print(f"Done! Created {count} posts.")
 
 if __name__ == '__main__':
     main()

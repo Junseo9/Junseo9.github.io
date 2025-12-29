@@ -36,7 +36,6 @@ exclude:
   - vendor/
 
 header_pages:
-  - hada.md
   - about.md
   - archive.md
 
