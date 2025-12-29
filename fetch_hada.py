@@ -130,10 +130,11 @@ def create_post(entry: dict) -> tuple[str, str]:
     filename = f"{date_str}-{slug}.md"
     
     content_md = html_to_markdown(entry['content_html'])
+    escaped_title = entry['title'].replace('"', '\\"')
     
     frontmatter = f"""---
 layout: post
-title: "{entry['title'].replace('"', '\\"')}"
+title: "{escaped_title}"
 date: {published.strftime('%Y-%m-%d %H:%M:%S')} +0900
 categories: geeknews
 tags: [geeknews, hada]
