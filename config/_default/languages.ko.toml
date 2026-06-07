@@ -1,0 +1,21 @@
+locale = "ko"
+label = "한국어"
+weight = 1
+title = "전서구 블로그"
+
+[params]
+  displayName = "한국어"
+  isoCode = "ko"
+  rtl = false
+  dateFormat = "2006년 1월 2일"
+  description = "개발, 프로젝트, 그리고 일상 이야기"
+
+[params.author]
+  name = "전서구"
+  email = "rlatjdgus2008@gmail.com"
+  headline = "게임 개발자를 꿈꾸는 학생"
+  bio = "게임 개발과 CS 전반에 관심이 많은 학생입니다."
+  links = [
+    { github = "https://github.com/Junseo9" },
+    { email = "mailto:rlatjdgus2008@gmail.com" },
+  ]
