@@ -1,0 +1,77 @@
+backend:
+  name: github
+  repo: Junseo9/Junseo9.github.io
+  branch: main
+
+site_url: https://junseo9.github.io
+display_url: https://junseo9.github.io
+
+media_folder: static/img
+public_folder: /img
+
+locale: ko
+
+slug:
+  encoding: unicode
+  clean_accents: false
+
+collections:
+  - name: posts
+    label: "글"
+    label_singular: "글"
+    folder: content/posts
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    editor:
+      preview: false
+    sortable_fields:
+      fields: [date, title]
+    fields:
+      - { label: "제목", name: title, widget: string }
+      - { label: "날짜", name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { label: "초안", name: draft, widget: boolean, default: false, required: false }
+      - { label: "설명", name: description, widget: string, required: false }
+      - { label: "태그", name: tags, widget: list, required: false }
+      - { label: "카테고리", name: categories, widget: list, required: false }
+      - { label: "대표 이미지", name: featureimage, widget: image, required: false }
+      - { label: "본문", name: body, widget: markdown }
+
+  - name: projects
+    label: "프로젝트"
+    label_singular: "프로젝트"
+    folder: content/projects
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    editor:
+      preview: false
+    fields:
+      - { label: "제목", name: title, widget: string }
+      - { label: "날짜", name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { label: "초안", name: draft, widget: boolean, default: false, required: false }
+      - { label: "설명", name: description, widget: string, required: false }
+      - { label: "태그", name: tags, widget: list, required: false }
+      - { label: "대표 이미지", name: featureimage, widget: image, required: false }
+      - { label: "GitHub 링크", name: externalUrl, widget: string, required: false }
+      - { label: "본문", name: body, widget: markdown }
+
+  - name: daily
+    label: "일상"
+    label_singular: "일상"
+    folder: content/daily
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    editor:
+      preview: false
+    fields:
+      - { label: "제목", name: title, widget: string }
+      - { label: "날짜", name: date, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { label: "초안", name: draft, widget: boolean, default: false, required: false }
+      - { label: "설명", name: description, widget: string, required: false }
+      - { label: "태그", name: tags, widget: list, required: false }
+      - { label: "본문", name: body, widget: markdown }
